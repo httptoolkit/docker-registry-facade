@@ -30,4 +30,5 @@ To configure this further, you can set the following environment variables:
 
 * `REGISTRY_HOST` (required): the hostname of the target registry, e.g. `registry.hub.docker.com`
 * `REGISTRY_ORG`: the org on the target registry which should be supported. If specified, only images from this organization will be accessible. If not, this facade will be usable to pull all images from any organization.
+* `ADDRESS`: the address that the container should listen on. This must be a [Caddyfile address](https://caddyserver.com/docs/caddyfile/concepts#addresses) (the default is `*`, which implies HTTPS on port 443).
 * `CACHE_TIMEOUT`: the redirects that this image serves come with cache headers to try & limit unnecessary requests. The default timeout is 1 day, but you can reduce it by specifying a number of seconds here.

@@ -3,7 +3,7 @@
     cache
 }
 
-{$HOST:*} {
+{$ADDRESS:*} {
     # If REGISTRY_ORG is set, limit requests to that path:
     map {$REGISTRY_ORG:""} {path_matcher} {
         ~.+ {$REGISTRY_ORG}/*
