@@ -1,0 +1,52 @@
+* {
+    route /v2/ {
+        reverse_proxy https://{$REGISTRY_HOST} {
+            # Use the correct hostname for upstream requests:
+            header_up Host {upstream_hostport}
+
+            # Don't forward the client's IP
+            header_up -X-Forwarded-For
+        }
+    }
+
+    # For blob requests (the heavy data) we try upstream: if it sends a redirect,
+    # that's perfect. If wants to send a 200 (the raw data) then we send our
+    # client a redirect instead, so we don't have to serve all that ourselves.
+    route /v2/{$REGISTRY_ORG}/*/blobs/* {
+        reverse_proxy https://{$REGISTRY_HOST} {
+            # Change to HEAD - we never want to receive the full body response please.
+            method HEAD
+
+            # Use the correct hostname for upstream requests.
+            header_up Host {upstream_hostport}
+
+            # Don't forward the client's IP, no need to expose that
+            header_up -X-Forwarded-For
+
+            # If the registry wants to return direct content (not a redirect) then we
+            # want to to redirect there instead. This _won't_ work if the registry
+            # needs auth, but it seems most registries don't for public images, and
+            # GHCR & DH at least both use redirects so will never hit this.
+            @direct status 2xx
+            handle_response @direct {
+                redir https://{$REGISTRY_HOST}{uri}
+            }
+        }
+    }
+
+    # Reverse proxy all other requests within our org (but not globally! We don't
+    # want to be a general-purpose registry proxy for everybody):
+    route /v2/{$REGISTRY_ORG}/* {
+        reverse_proxy https://{$REGISTRY_HOST} {
+            # Use the correct hostname for upstream requests.
+            header_up Host {upstream_hostport}
+
+            # Don't forward the client's IP, no need to expose that
+            header_up -X-Forwarded-For
+        }
+    }
+
+    route * {
+        respond 502
+    }
+}
