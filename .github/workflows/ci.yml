@@ -37,7 +37,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Update repo description
+      - name: Update production container to latest image version
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: thibaultchazal/scaleway-serverless-container-deploy-action@main
+        with:
+          container_id: ${{ vars.SCW_API_CONTAINER_ID }}
+          secret_key: ${{ secrets.SCW_SECRET_KEY }}
+          registry_image_url: "ghcr.io/httptoolkit/docker-registry-facade:main"
+
+      - name: Update Docker Hub repo description
         if: github.event_name != 'pull_request' && startsWith(github.ref, 'ref/tags/')
         uses: peter-evans/dockerhub-description@v2
         with:
