@@ -47,6 +47,8 @@
     }
 
     route * {
-        respond 502
+        respond 403 {
+            body `{ "errors": [{"message": "Only pulls for {$REGISTRY_ORG} images are supported"}] }`
+        }
     }
 }
