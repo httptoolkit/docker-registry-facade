@@ -5,8 +5,8 @@
 
 {$HOST:*} {
     @api_request {
-        /v2/
-        /v2/${REGISTRY_ORG}/*
+        path /v2/
+        path /v2/{$REGISTRY_ORG}/*
     }
 
     route @api_request {
@@ -18,7 +18,9 @@
         cache {
             ttl {$CACHE_TIMEOUT:86400}s
             default_cache_control max-age={$CACHE_TIMEOUT:86400}, must-revalidate
-            key { hide }
+            key {
+                hide
+            }
         }
     }
 
