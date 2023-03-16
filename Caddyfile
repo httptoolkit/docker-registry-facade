@@ -4,73 +4,27 @@
 }
 
 {$HOST:*} {
-    route /v2/ {
-        reverse_proxy https://{$REGISTRY_HOST} {
-            # Use the correct hostname for upstream requests:
-            header_up Host {upstream_hostport}
-
-            # Don't forward the client's IP
-            header_up -X-Forwarded-For
-        }
+    @api_request {
+        /v2/
+        /v2/${REGISTRY_ORG}/*
     }
 
-    # For blob requests (the heavy data) we try upstream: if it sends a redirect,
-    # that's perfect. If wants to send a 200 (the raw data) then we send our
-    # client a redirect instead, so we don't have to serve all that ourselves.
-    route /v2/{$REGISTRY_ORG}/*/blobs/* {
-        reverse_proxy https://{$REGISTRY_HOST} {
-            # Change to HEAD - we never want to receive the full body response please.
-            method HEAD
+    route @api_request {
+        redir https://{$REGISTRY_HOST}{uri} 307
 
-            # Use the correct hostname for upstream requests.
-            header_up Host {upstream_hostport}
-
-            # Don't forward the client's IP, no need to expose that
-            header_up -X-Forwarded-For
-
-            # If the registry wants to return direct content (not a redirect) then we
-            # want to to redirect there instead. This _won't_ work if the registry
-            # needs auth, but it seems most registries don't for public images, and
-            # GHCR & DH at least both use redirects so will never hit this.
-            @direct status 2xx
-            handle_response @direct {
-                redir https://{$REGISTRY_HOST}{uri}
-            }
-        }
-    }
-
-    # Reverse proxy all other requests within our org (but not globally! We don't
-    # want to be a general-purpose registry proxy for everybody):
-    route /v2/{$REGISTRY_ORG}/* {
-        # Cache these upstream requests here in memory for 10 mins, for perf and to
-        # avoid hitting the upstream registry unnecessarily:
+        # These responses are all constant redirects, except if we actually change to a
+        # completely different registry. Cache them for 1 day, so that clients & downstream
+        # proxies can avoid fully duplicating basic requests here, so far as possible.
         cache {
-            # Don't cache HEAD (they're cheap & don't count for rate limits)
-            allowed_http_verbs GET
-
-            ttl {$CACHE_TIMEOUT:21600}s
-            default_cache_control max-age={$CACHE_TIMEOUT:21600}, must-revalidate
-            key {
-                # IMPORTANT: We ignore authorization for caching. This means that
-                # any private responses will be cached and available to everyone!
-                # -- DO NOT REQUEST PRIVATE IMAGES THROUGH THIS REGISTRY FACADE --
-                headers ""
-                hide
-            }
-        }
-
-        reverse_proxy https://{$REGISTRY_HOST} {
-            # Use the correct hostname for upstream requests.
-            header_up Host {upstream_hostport}
-
-            # Don't forward the client's IP, no need to expose that
-            header_up -X-Forwarded-For
+            ttl {$CACHE_TIMEOUT:86400}s
+            default_cache_control max-age={$CACHE_TIMEOUT:86400}, must-revalidate
+            key { hide }
         }
     }
 
     route * {
         respond 403 {
-            body `{ "errors": [{"message": "Only pulls for {$REGISTRY_ORG} images are supported"}] }`
+            body `{ "errors": [{"message": "Only API requests for {$REGISTRY_ORG} images are supported"}] }`
         }
     }
 }
