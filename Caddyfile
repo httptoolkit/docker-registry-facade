@@ -1,4 +1,4 @@
-* {
+{$HOST:*} {
     route /v2/ {
         reverse_proxy https://{$REGISTRY_HOST} {
             # Use the correct hostname for upstream requests:
