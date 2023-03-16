@@ -26,6 +26,8 @@ and then pull from it, e.g. with:
 docker pull localhost/pimterry/docker-registry-facade
 ```
 
+Remember that when specifying a registry explicitly like this, non-namespaced images that work automatically with Docker Hub, like `nginx` and `busybox`, need to be referenced fully in the `library` namespace, e.g. `docker pull localhost/library/busybox`.
+
 To configure this further, you can set the following environment variables:
 
 * `REGISTRY_HOST` (required): the hostname of the target registry, e.g. `registry.hub.docker.com`
