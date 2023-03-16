@@ -30,6 +30,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           images: pimterry/docker-registry-facade,ghcr.io/httptoolkit/docker-registry-facade
+          tags:
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - uses: docker/build-push-action@v2
         with:
