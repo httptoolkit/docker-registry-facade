@@ -4,9 +4,15 @@
 }
 
 {$HOST:*} {
+    # If REGISTRY_ORG is set, limit requests to that path:
+    map {$REGISTRY_ORG:""} {path_matcher} {
+        ~.+ {$REGISTRY_ORG}/*
+        default *
+    }
+
     @api_request {
         path /v2/
-        path /v2/{$REGISTRY_ORG}/*
+        path /v2/{path_matcher}
     }
 
     route @api_request {
@@ -26,7 +32,7 @@
 
     route * {
         respond 403 {
-            body `{ "errors": [{"message": "Only API requests for {$REGISTRY_ORG} images are supported"}] }`
+            body `{ "errors": [{"message": "Only API requests for {path_matcher} images are supported"}] }`
         }
     }
 }
