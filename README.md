@@ -2,7 +2,7 @@
 
 > _Part of [HTTP Toolkit](https://httptoolkit.com): powerful tools for building, testing & debugging HTTP(S)_
 
-A tiny self-hostable Docker Registry facade - own your registry URL without running your own registry.
+A tiny self-hostable Docker Registry facade - own your registry URL without running your own registry (there's more details about how this works in [the blog post](https://httptoolkit.com/blog/docker-image-registry-facade/)).
 
 This is intended to help organizations publishing images mitigate the upcoming Dockerpocalypse by:
 
