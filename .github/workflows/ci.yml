@@ -29,7 +29,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          images: pimterry/docker-registry-facade,ghcr.io/httptoolkit/docker-registry-facade
+          images: httptoolkit/docker-registry-facade,ghcr.io/httptoolkit/docker-registry-facade
           tags:
             type=raw,value=latest,enable={{is_default_branch}}
 
@@ -55,5 +55,5 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: pimterry/docker-registry-facade
+          repository: httptoolkit/docker-registry-facade
           short-description: ${{ github.event.repository.description }}
