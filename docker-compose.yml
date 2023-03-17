@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  docker-registry-facade:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/httptoolkit/docker-registry-facade:latest
+    restart: unless-stopped
+    container_name: docker-registry-facade
+    ports:
+      - "443:443"
+    environment:
+      REGISTRY_HOST : 'registry.hub.docker.com'
+      REGISTRY_ORG : ''
+      ADDRESS : '*'
+      CACHE_TIMEOUT : '86400'
